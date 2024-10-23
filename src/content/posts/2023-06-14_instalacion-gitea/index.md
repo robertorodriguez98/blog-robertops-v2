@@ -1,10 +1,9 @@
 ---
 title: Instalación Gitea
 published: 2023-06-14
-description: "How to use this blog template."
 image: "./cover.png"
 tags: ["git", "autoalojado","docker","vps"]
-category: documentación
+category: Documentación
 draft: false
 ---
 

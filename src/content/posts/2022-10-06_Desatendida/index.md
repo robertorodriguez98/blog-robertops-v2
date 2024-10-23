@@ -1,10 +1,9 @@
 ---
 title: Instalación de Debian desatendida
 published: 2022-10-06
-description: "How to use this blog template."
 image: "./featured.png"
 tags: ["Debian", "preseed"]
-category: documentación
+category: Documentación
 draft: false
 ---
 
