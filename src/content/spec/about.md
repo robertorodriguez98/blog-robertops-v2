@@ -1,9 +1,8 @@
-# About
+# Sobre mí
 This is the demo site for [Fuwari](https://github.com/saicaca/fuwari).
 
 ::github{repo="robertorodriguez98/blog-robertops-v2"}
 
-> ### Sources of images used in this site
+> ### Fuentes de las imágenes usadas en el sitio
 > - [Unsplash](https://unsplash.com/)
-> - [星と少女](https://www.pixiv.net/artworks/108916539) by [Stella](https://www.pixiv.net/users/93273965)
-> - [Rabbit - v1.4 Showcase](https://civitai.com/posts/586908) by [Rabbit_YourMajesty](https://civitai.com/user/Rabbit_YourMajesty)
+> - [Imagen de perfil](https://picrew.me/en/image_maker/35494)
