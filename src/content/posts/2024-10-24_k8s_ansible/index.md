@@ -8,6 +8,11 @@ category: ''
 draft: true 
 lang: ''
 ---
+
+:::note
+Los archivos del proyecto se encuentran en [este repositorio](https://github.com/robertorodriguez98/k3s-ansible)
+:::
+
 ## Preparación del escenario
 
 Se van a crear 3 máquinas virtuales, 1 actuará de plano de control, y las otras 2 serán nodos. Para crear el escenario se va a usar **Vagrant** con **virtualbox** como proveedor, utilizando el siguiente `Vagrantfile`:
@@ -134,3 +139,11 @@ all:
     - name: instalamos k3s con el token
       shell: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ ip_pcontrol }}:6443 K3S_TOKEN={{ hostvars['p_nodo'].token_k3s }} sh -"
 ```
+
+Tras ejecutar el playbook, k3s se habrá instalado correctamente. Podemos comprobarlo con `kubectl`
+
+```shell
+kubectl get nodes
+```
+
+![kubectl get nodes](get_nodes.png)
