@@ -5,7 +5,7 @@ description: ''
 image: ''
 tags: []
 category: ''
-draft: false 
+draft: true 
 lang: ''
 ---
 ## Preparación del escenario
@@ -57,3 +57,26 @@ chmod 600 "$KUBECONFIG"
 sudo k3s kubectl config view --raw > "$KUBECONFIG"
 ```
 
+una vez instalado kubernetes, copiamos la configuración de kubernetes del plano de control a nuestro kubeconfig :
+
+```shell
+export KUBECONFIG=~/.kube/config
+mkdir ~/.kube 2> /dev/null
+chmod 600 "$KUBECONFIG"
+ssh -i .vagrant/machines/plano-control/virtualbox/private_key vagrant@192.168.56.10 'sudo k3s kubectl config view --raw' > ~/.kube/config
+```
+
+y en el fichero modificamos la ip de localhost por la de la máquina:
+```shell
+sed -i 's/127\.0\.0\.1/192\.168\.56\.10/g' $KUBECONFIG
+```
+
+Finalmente podemos usar kubectl.
+
+```shell
+❯ kubectl get nodes
+NAME            STATUS   ROLES                  AGE   VERSION
+nodo1           Ready    <none>                 15m   v1.30.5+k3s1
+nodo2           Ready    <none>                 14m   v1.30.5+k3s1
+plano-control   Ready    control-plane,master   15m   v1.30.5+k3s1
+```
