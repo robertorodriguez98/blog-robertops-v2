@@ -1,5 +1,5 @@
 ---
-title: Instalación de k8s utilizando Ansible
+title: Instalación de kubernetes utilizando Ansible
 published: 2024-10-30
 description: ''
 image: ''
@@ -54,4 +54,83 @@ sed -i 's/127\.0\.0\.1/192\.168\.56\.10/g' $KUBECONFIG
 
 Finalmente podemos usar kubectl.
 
-## Instalación k3s
+## Instalación k8s
+
+Para instalar kubernetes se va a utilizar [k3s](https://k3s.io/), que se instala siguiendo estos pasos:
+
+* en el **plano de control**:
+  ```shell
+  curl -sfL https://get.k3s.io | sh -
+  ```
+  después se obtiene el token en `/var/lib/rancher/k3s/server/node-token`
+* en los nodos:
+  ```shell
+  curl -sfL https://get.k3s.io | K3S_URL=https://[ip plano control]:6443 K3S_TOKEN=[token] sh -
+  ```
+
+### Ansible
+
+sin embargo, nos interesa automatizar dicho proceso ya que haciendo esto permite escalar el número de nodos fácilmente. para ello, se va a usar [ansible](https://www.ansible.com/). Se han configurado los siguientes ficheros.
+
+### Inventario
+
+```yaml
+all:
+  children:
+    planos_control:
+      hosts:
+        p_nodo: 
+          ansible_ssh_host: 192.168.56.10
+          ansible_ssh_user: vagrant
+          ansible_ssh_private_key_file: ../.vagrant/machines/plano-control/virtualbox/private_key
+    trabajadores:
+      hosts:
+        nodo1: 
+          ansible_ssh_host: 192.168.56.20
+          ansible_ssh_user: vagrant
+          ansible_ssh_private_key_file: ../.vagrant/machines/nodo1/virtualbox/private_key
+        nodo2: 
+          ansible_ssh_host: 192.168.56.30
+          ansible_ssh_user: vagrant
+          ansible_ssh_private_key_file: ../.vagrant/machines/nodo2/virtualbox/private_key
+
+  vars:
+    token_k3s: ""
+    token_k3s_base64: ""
+    ip_pcontrol: "192.168.56.10"
+```
+
+### Playbook
+
+```yaml
+- hosts: all
+  become: true
+  tasks:
+    - name: Actualizamos el sistema
+      apt: update_cache=yes upgrade=yes
+    - name: nos aseguramos de que curl esté instalado
+      apt:
+        pkg: 
+          - curl
+
+- hosts: planos_control
+  become: true
+  tasks:
+    # Para que no haya problemas de certificados al usar kubectl, añadimos la IP del plano de control durante la instalación de k3s.
+    - name: instalamos k3s
+      shell: "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='--tls-san {{ ip_pcontrol }}' sh -"
+    - name: sacar token
+      ansible.builtin.slurp:
+        src: "/var/lib/rancher/k3s/server/node-token"
+      register: token_k3s_base64
+    - name: descodificar token
+      ansible.builtin.set_fact:
+        token_k3s: "{{ token_k3s_base64.content | ansible.builtin.b64decode | replace('\n', '' ) }}"
+    - debug: msg="el token es {{token_k3s}}"
+
+- hosts: trabajadores
+  become: true
+  tasks:
+    - name: instalamos k3s con el token
+      shell: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ ip_pcontrol }}:6443 K3S_TOKEN={{ hostvars['p_nodo'].token_k3s }} sh -"
+```
